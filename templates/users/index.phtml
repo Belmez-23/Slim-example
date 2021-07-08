@@ -1,6 +1,11 @@
 <h3>My besties</h3>
+<form method="get" action="/users">
+    <input type="search" name="term" value="<?= htmlspecialchars($term) ?>" />
+    <input type="submit" value="Search" />
 <ul>
     <?php foreach ($users as $user) : ?>
-        <li><?= htmlspecialchars($user) ?></li>
+        <li><?= htmlspecialchars($user['name']) ?> (<?= htmlspecialchars($user['email']) ?>)</li>
     <?php endforeach; ?>
 </ul>
+</form>
+<a href="/users/new">Добавить нового</a>
