@@ -4,7 +4,7 @@
     <input type="submit" value="Search" />
 <ul>
     <?php foreach ($users as $user) : ?>
-        <li><?= htmlspecialchars($user['name']) ?> (<?= htmlspecialchars($user['email']) ?>)</li>
+        <li><a href="/users/<?=$user['id'] ?>"><?=htmlspecialchars($user['name']) ?> (<?= htmlspecialchars($user['email']) ?>)</a></li>
     <?php endforeach; ?>
 </ul>
 </form>

@@ -7,6 +7,8 @@ require __DIR__ . '/../vendor/autoload.php';
 
 use Slim\Factory\AppFactory;
 use DI\Container;
+use Psr\Http\Message\ServerRequestInterface as Request;
+use Psr\Http\Message\ResponseInterface as Response;
 
 $container = new Container();
 $container->set('renderer', function () {
@@ -22,8 +24,13 @@ $router = $app->getRouteCollector()->getRouteParser();
 
 // ************* ОБРАБОТЧИК ************* //
 // ************* ГЛАВНАЯ ************* //
-$app->get('/', function ($request, $response) { //+
+$app->get('/', function ($request, $response) use ($router) { //+
     //var_dump($_SESSION);
+    $router->urlFor('users');
+    $router->urlFor('user'); //users/new
+    $router->urlFor('courses');
+    $router->urlFor('course'); //courses/new
+
     return $this->get('renderer')->render($response, '/../index.php');
 });
 
@@ -35,7 +42,7 @@ $app->get('/users', function ($request, $response) use ($repo_user) { //+
     $users = $repo_user->search($term);
     $params = ['users' => $users];
     return $this->get('renderer')->render($response, 'users/index.phtml', $params);
-});
+})->setName('users');
 
 $app->get('/users/new', function ($request, $response) { //+
     $params = [
@@ -43,7 +50,7 @@ $app->get('/users/new', function ($request, $response) { //+
         'errors' => []
     ];
     return $this->get('renderer')->render($response, "users/new.phtml", $params);
-});
+})->setName('user');
 
 $app->post('/users', function ($request, $response) use ($repo_user) { //+
     $user = $request->getParsedBodyParam('user');
@@ -60,8 +67,16 @@ $app->post('/users', function ($request, $response) use ($repo_user) { //+
     return $this->get('renderer')->render($response, "users/new.phtml", $params);
 });
 
-$app->get('/users/{id}', function ($request, $response, $args) { //старый код
-    $params = ['id' => $args['id'], 'nickname' => 'user-' . $args['id']];
+$app->get('/users/{id}', function ($request, Response $response, $args) use ($repo_user) { //adapted
+    $user = $repo_user->find($args['id']);
+    if(!($user)){
+        $response->getBody()->write('Пользователь не найден');
+        //выводит ошибку, но не устанавливает статус?
+        return $response->withStatus(404)
+            ->withHeader('Content-Type', 'text/html');
+    }
+    //var_dump($user);
+    $params = ['id' => $user['id'], 'name' => $user['name']];
     return $this->get('renderer')->render($response, 'users/show.phtml', $params);
 });
 
@@ -74,7 +89,7 @@ $app->get('/courses/new', function ($request, $response) { //+
         'errors' => []
     ];
     return $this->get('renderer')->render($response, "courses/new.phtml", $params);
-});
+})->setName('course');
 
 $app->post('/courses', function ($request, $response) use ($repo_course) { //+
     $course = $request->getParsedBodyParam('course');
@@ -96,11 +111,13 @@ $app->get('/courses', function ($request, $response) use ($repo_course){ //+
     $courses = $repo_course->search($term) ; //filter here
     $params = ['courses' => $courses];
     return $this->get('renderer')->render($response, "courses/index.phtml", $params);
-});
+})->setName('courses');
 
 $app->get('/courses/{id}', function ($request, $response, array $args) { //старый код
     $id = $args['id'];
     return $response->write("Course id: {$id}");
 });
+
+//**************X**************//
 
 $app->run();

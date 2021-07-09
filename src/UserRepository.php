@@ -14,13 +14,9 @@ class UserRepository
         return array_values($_SESSION);
     }
 
-    public function find(int $id)
+    public function find($id)
     {
-        if (!isset($_SESSION[$id])) {
-            throw new \Exception("Wrong name id: {$id}");
-        }
-
-        return $_SESSION[$id];
+        return  $_SESSION[$id] ?? [];//throw new \Exception("Wrong name id: {$id}");
     }
 
     public function save(array $user)
@@ -34,12 +30,12 @@ class UserRepository
         foreach ($_SESSION as $user){
             if(str_starts_with($user['id'], 'id') && str_contains($user['name'], $term)){
                 $result[] = ['name' => $user['name'],
-                    'email' => $user['email']
+                    'email' => $user['email'],
+                    'id' => $user['id']
                 ];
             }
         }
         return $result;
-
     }
 
 }
