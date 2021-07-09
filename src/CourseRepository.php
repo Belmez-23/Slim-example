@@ -23,35 +23,21 @@ class CourseRepository
         return $_SESSION[$id];
     }
 
-    public function save(array $item)
+    public function save(array $course)
     {
-        if (empty($item['title']) || $item['paid'] === '') {
-            $json = json_encode($item);
-            throw new \Exception("Wrong data: {$json}");
-        }
-        $item['id'] = uniqid();
-        $_SESSION[$item['id']] = $item;
-        $file = fopen('courses_list.csv', 'a');
-        fputcsv($file, $item);
-        fclose($file);
+        $course['id'] = 'co'.uniqid();
+        $_SESSION[$course['id']] = $course;
     }
 
     public function search($term)
     {
-        $file = fopen('courses_list.csv', 'r');
-        if ($file!== FALSE) {
-            while (($data = fgetcsv($file, 0, ",")) !== FALSE) {
-                $list[] = $data;
+        foreach ($_SESSION as $course){
+            if(str_starts_with($course['id'], 'co') && str_contains($course['title'], $term)){
+                $result[] = ['title' => $course['title'],
+                    'paid' => $course['paid']
+                ];
             }
-            foreach ($list as $item){
-                if(str_contains($item[0], $term)){
-                    $result[] = ['title' => $item[0],
-                        'paid' => $item[1]
-                    ];  //ищется и передаётся только имя
-                }
-            }
-            return $result;
-            fclose($file);
         }
+        return $result;
     }
 }

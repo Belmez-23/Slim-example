@@ -6,5 +6,13 @@
         "slim/php-view": "^3.1",
         "php-di/php-di": "^6.3",
         "slim/twig-view": "^3.2"
+    },
+    "autoload": {
+        "psr-4": {"App\\": "src/"},
+        "files": [
+            "src/CourseRepository.php",
+            "src/UserRepository.php",
+            "src/Validate.php"
+        ]
     }
 }

@@ -1,14 +1,9 @@
 <?php
 
 // Подключение автозагрузки через composer
-//!команда запуска - make term , a не php -S localhost:8080!
-require_once  __DIR__ . "/../src/CourseRepository.php";
-require_once  __DIR__ . "/../src/UserRepository.php";
-require_once  __DIR__ . "/../src/Validator.php";
-//уточнить как ссылаться на пространство имён, не файл в репозитории
-require __DIR__ . '/../vendor/autoload.php';
+//!команда запуска - make start , a не php -S localhost:8080!
 
-// Контейнеры в этом курсе не рассматриваются (это тема связанная с самим ООП), но если вам интересно, то посмотрите DI Container
+require __DIR__ . '/../vendor/autoload.php';
 
 use Slim\Factory\AppFactory;
 use DI\Container;
@@ -23,14 +18,15 @@ $app->addErrorMiddleware(true, true, true);
 
 //$app = AppFactory::create();
 //$app->addErrorMiddleware(true, true, true);
+$router = $app->getRouteCollector()->getRouteParser();
 
-// Обработчик
-$app->get('/', function ($request, $response) {
-    $response->getBody()->write('<h1>Hello</h1>
-<a href="/users">Страница пользователей</a>
-<br><a href="/courses">Страница курсов</a>');
-    return $response;
+// ************* ОБРАБОТЧИК ************* //
+// ************* ГЛАВНАЯ ************* //
+$app->get('/', function ($request, $response) { //+
+    //var_dump($_SESSION);
+    return $this->get('renderer')->render($response, '/../index.php');
 });
+
 /************** ПОЛЬЗОВАТЕЛИ **************/
 $repo_user = new App\UserRepository();
 
@@ -40,8 +36,6 @@ $app->get('/users', function ($request, $response) use ($repo_user) { //+
     $params = ['users' => $users];
     return $this->get('renderer')->render($response, 'users/index.phtml', $params);
 });
-
-//$repo = new UserRepository();
 
 $app->get('/users/new', function ($request, $response) { //+
     $params = [
@@ -53,8 +47,8 @@ $app->get('/users/new', function ($request, $response) { //+
 
 $app->post('/users', function ($request, $response) use ($repo_user) { //+
     $user = $request->getParsedBodyParam('user');
-    $validator = new App\Validator(); //проверка правильности ввода
-    $errors = $validator->validate($user);
+    $validator = new \App\Validator(); //проверка правильности ввода
+    $errors = $validator->validate('name','email', $user);
     if (count($errors) === 0) {
         $repo_user->save($user); //записать юзера
         return $response->withRedirect('/users', 302);
@@ -85,7 +79,7 @@ $app->get('/courses/new', function ($request, $response) { //+
 $app->post('/courses', function ($request, $response) use ($repo_course) { //+
     $course = $request->getParsedBodyParam('course');
     $validator = new App\Validator(); //проверка правильности ввода
-    $errors = $validator->validate($course);
+    $errors = $validator->validate('paid', 'title', $course);
     if (count($errors) === 0) {
         $repo_course->save($course); //записать
         return $response->withRedirect('/courses', 302);
@@ -97,7 +91,7 @@ $app->post('/courses', function ($request, $response) use ($repo_course) { //+
     return $this->get('renderer')->render($response, "courses/new.phtml", $params);
 });
 
-$app->get('/courses', function ($request, $response) use ($repo_course){ //-
+$app->get('/courses', function ($request, $response) use ($repo_course){ //+
     $term = $request->getQueryParam('term');
     $courses = $repo_course->search($term) ; //filter here
     $params = ['courses' => $courses];

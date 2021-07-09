@@ -12,7 +12,7 @@
     <div>
         <label>
             Email
-            <input type="email" required name="user[email]" value="<?= htmlspecialchars($user['email']) ?>">
+            <input type="email" name="user[email]" value="<?= htmlspecialchars($user['email']) ?>">
         </label>
         <?php if (isset($errors['email'])): ?>
             <div><?= $errors['email'] ?></div>

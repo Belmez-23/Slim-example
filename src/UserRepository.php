@@ -23,36 +23,23 @@ class UserRepository
         return $_SESSION[$id];
     }
 
-    public function save(array $item)
+    public function save(array $user)
     {
-        if (empty($item['name']) || $item['email'] === '') {
-            $json = json_encode($item);
-            throw new \Exception("Wrong data: {$json}");
-        }
-        $item['id'] = uniqid();
-        $_SESSION[$item['id']] = $item;
-        $file = fopen('user_list.csv', 'a');
-        fputcsv($file, $item);
-        fclose($file);
+        $user['id'] = 'id'.uniqid();
+        $_SESSION[$user['id']] = $user;
     }
 
     public function search($term)
     {
-        $file = fopen('user_list.csv', 'r');
-        if ($file!== FALSE) {
-            while (($data = fgetcsv($file, 0, ",")) !== FALSE) {
-                $list[] = $data;
+        foreach ($_SESSION as $user){
+            if(str_starts_with($user['id'], 'id') && str_contains($user['name'], $term)){
+                $result[] = ['name' => $user['name'],
+                    'email' => $user['email']
+                ];
             }
-            foreach ($list as $user){
-                if(str_contains($user[0], $term)){
-                    $result[] = ['name' => $user[0],
-                    'email' => $user[1]
-                    ]; //ищется и передаётся только имя
-                }
-            }
-            return $result;
-            fclose($file);
         }
+        return $result;
+
     }
 
 }
