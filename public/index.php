@@ -10,12 +10,20 @@ use DI\Container;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Http\Message\ResponseInterface as Response;
 
+// Начало сессии в PHP
+session_start();
+
 $container = new Container();
 $container->set('renderer', function () {
     // Параметром передается базовая директория, в которой будут храниться шаблоны
     return new \Slim\Views\PhpRenderer(__DIR__ . '/../templates');
 });
-$app = AppFactory::createFromContainer($container);
+$container->set('flash', function () {
+    return new \Slim\Flash\Messages();
+});
+
+AppFactory::setContainer($container);
+$app = AppFactory::create();
 $app->addErrorMiddleware(true, true, true);
 
 //$app = AppFactory::create();
@@ -119,5 +127,22 @@ $app->get('/courses/{id}', function ($request, $response, array $args) { //ст�
 });
 
 //**************X**************//
+$app->get('/foo', function ($req, $res) {
+    // Добавление флеш-сообщения. Оно станет доступным на следующий HTTP-запрос.
+    // 'success' — тип флеш-сообщения. Используется при выводе для форматирования.
+    // Например можно ввести тип success и отражать его зелёным цветом (на Хекслете такого много)
+    $this->get('flash')->addMessage('success', 'This is a message');
+
+    return $res->withRedirect('/bar');
+});
+
+$app->get('/bar', function ($req, $res, $args) {
+    // Извлечение flash сообщений установленных на предыдущем запросе
+    $messages = $this->get('flash')->getMessages();
+    print_r($messages); // => ['success' => ['This is a message']]
+
+    $params = ['flash' => $messages];
+    return $this->get('renderer')->render($res, 'bar.phtml', $params);
+});
 
 $app->run();
