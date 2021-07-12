@@ -48,6 +48,8 @@ $repo_user = new App\UserRepository();
 $app->get('/users', function ($request, $response) use ($repo_user) { //+
     $term = $request->getQueryParam('term');
     $users = $repo_user->search($term);
+    $messages = $this->get('flash')->getMessages();
+    echo $messages['user-status'][0];
     $params = ['users' => $users];
     return $this->get('renderer')->render($response, 'users/index.phtml', $params);
 })->setName('users');
@@ -66,12 +68,14 @@ $app->post('/users', function ($request, $response) use ($repo_user) { //+
     $errors = $validator->validate('name','email', $user);
     if (count($errors) === 0) {
         $repo_user->save($user); //записать юзера
+        $this->get('flash')->addMessage('user-status', 'Пользователь создан');
         return $response->withRedirect('/users', 302);
     }
     $params = [
         'user' => $user,
         'errors' => $errors
     ];
+    $this->get('flash')->addMessage('user-status', 'Пользователь не создан');
     return $this->get('renderer')->render($response, "users/new.phtml", $params);
 });
 
@@ -132,7 +136,7 @@ $app->get('/foo', function ($req, $res) {
     // 'success' — тип флеш-сообщения. Используется при выводе для форматирования.
     // Например можно ввести тип success и отражать его зелёным цветом (на Хекслете такого много)
     $this->get('flash')->addMessage('success', 'This is a message');
-
+    $this->get('flash')->addMessage('error', 'This is a second message');
     return $res->withRedirect('/bar');
 });
 
@@ -142,7 +146,7 @@ $app->get('/bar', function ($req, $res, $args) {
     print_r($messages); // => ['success' => ['This is a message']]
 
     $params = ['flash' => $messages];
-    return $this->get('renderer')->render($res, 'bar.phtml', $params);
+    return $this->get('renderer')->render($res, 'users/show.phtml', $params);
 });
 
 $app->run();

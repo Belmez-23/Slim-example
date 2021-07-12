@@ -9,17 +9,17 @@ interface ValidatorInterface
 
 class Validator implements ValidatorInterface
 {
-    public function validate($param1, $param2, array $anydata)
+    public function validate($param1, $param2, array $anydata): array
     {
         // BEGIN (write your solution here)
         $errors = [];
 
         if (empty($anydata[$param1])) {
-            $errors[$param1] = "Пропущены данные об ".$param1;
+            $errors[$param1] = "Пропущены данные о ".$param1;
         }
 
         if (empty($anydata[$param2])) {
-            $errors[$param2] = "Пропущены данные об ".$param2;
+            $errors[$param2] = "Пропущены данные о ".$param2;
         }
 
         return $errors;
