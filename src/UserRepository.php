@@ -22,7 +22,7 @@ class UserRepository implements Validator
 
     public function save(array $user)
     {
-        $user['id'] = 'id'.uniqid();
+        $user['id'] ?? $user['id'] = 'id'.uniqid();
         $_SESSION[$user['id']] = $user;
     }
 
@@ -52,5 +52,10 @@ class UserRepository implements Validator
         }
 
         return $errors;
+    }
+
+    public function destroy($id)
+    {
+        unset($_SESSION[$id]);
     }
 }

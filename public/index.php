@@ -9,7 +9,7 @@ use Slim\Factory\AppFactory;
 use DI\Container;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Http\Message\ResponseInterface as Response;
-
+use Slim\Middleware\MethodOverrideMiddleware;
 // Начало сессии в PHP
 session_start();
 
@@ -25,7 +25,8 @@ $container->set('flash', function () {
 AppFactory::setContainer($container);
 $app = AppFactory::create();
 $app->addErrorMiddleware(true, true, true);
-
+$app->add(MethodOverrideMiddleware::class);
+$app->add(MethodOverrideMiddleware::class);
 //$app = AppFactory::create();
 //$app->addErrorMiddleware(true, true, true);
 $router = $app->getRouteCollector()->getRouteParser();
@@ -60,7 +61,7 @@ $app->get('/users/new', function ($request, $response) { //+
         'errors' => []
     ];
     return $this->get('renderer')->render($response, "users/new.phtml", $params);
-})->setName('user');
+})->setName('newUser');
 
 $app->post('/users', function ($request, $response) use ($repo_user) { //+
     $user = $request->getParsedBodyParam('user');
@@ -83,15 +84,59 @@ $app->get('/users/{id}', function ($request, Response $response, $args) use ($re
     $user = $repo_user->find($args['id']);
     if(!($user)){
         $response->getBody()->write('Пользователь не найден');
-        //выводит ошибку, но не устанавливает статус?
         return $response->withStatus(404)
             ->withHeader('Content-Type', 'text/html');
     }
     //var_dump($user);
+    $messages = $this->get('flash')->getMessages();
+    echo $messages['user-status'][0];
     $params = ['id' => $user['id'], 'name' => $user['name']];
     return $this->get('renderer')->render($response, 'users/show.phtml', $params);
-});
+})->setName('user');
 
+$app->get('/users/{id}/edit', function ($request, $response, array $args) use ($repo_user) {
+    $id = $args['id'];
+    $user = $repo_user->find($id);
+    $params = [
+        'user' => $user
+    ];
+    return $this->get('renderer')->render($response, 'users/edit.phtml', $params);
+})->setName('editUser');
+
+$app->patch('/users/{id}', function ($request, $response, array $args) use ($router, $repo_user){
+    $id = $args['id'];
+    $user = $repo_user->find($id);
+    $data = $request->getParsedBodyParam('user');
+
+    $errors = $repo_user->validate($data);
+
+    if (count($errors) === 0){
+        // Ручное копирование данных из формы в нашу сущность
+        $user['name'] = $data['name'];
+        $user['email'] = $data['email'];
+
+        $this->get('flash')->addMessage('user-status', 'Пользователь обновлён');
+        $repo_user->save($user);
+        $url = $router->urlFor('user', ['id' => $user['id']]);
+        return $response->withRedirect($url);
+    }
+
+    $params = [
+        'user' => $user,
+        'errors' => $errors
+    ];
+
+    $response = $response->withStatus(422);
+    return $this->get('renderer')->render($response, 'users/edit.phtml', $params);
+}
+);
+
+$app->delete('/users/{id}', function ($request, $response, array $args) use ($router, $repo_user){
+    $id = $args['id'];
+    $repo_user->destroy($id);
+    $this->get('flash')->addMessage('user-status', 'Пользователь удалён');
+    return $response->withRedirect($router->urlFor('users'));
+});
 /************** КУРСЫ **************/
 $repo_course = new App\CourseRepository();
 
