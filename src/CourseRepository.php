@@ -2,7 +2,7 @@
 
 namespace App;
 
-class CourseRepository
+class CourseRepository implements Validator
 {
     public function __construct()
     {
@@ -39,5 +39,15 @@ class CourseRepository
             }
         }
         return $result;
+    }
+
+    public function validate(array $data)
+    {
+        $errors = [];
+        if (empty($data['title'])) {
+            $errors['title'] = "Не указано название курса";
+        }
+
+        return $errors;
     }
 }

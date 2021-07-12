@@ -1,8 +1,9 @@
 <?php
 
 namespace App;
+//include 'Validator.php';
 
-class UserRepository
+class UserRepository implements Validator
 {
     public function __construct()
     {
@@ -38,4 +39,18 @@ class UserRepository
         return $result;
     }
 
+    public function validate(array $data)
+    {
+        $errors = [];
+
+        if (empty($data['name'])) {
+            $errors['name'] = "Пропущены данные об имени";
+        }
+
+        if (empty($data['email'])) {
+            $errors['email'] = "Пропущены данные о email";
+        }
+
+        return $errors;
+    }
 }

@@ -11,9 +11,9 @@
     "autoload": {
         "psr-4": {"App\\": "src/"},
         "files": [
+            "src/Validator.php",
             "src/CourseRepository.php",
-            "src/UserRepository.php",
-            "src/Validator.php"
+            "src/UserRepository.php"
         ]
     }
 }

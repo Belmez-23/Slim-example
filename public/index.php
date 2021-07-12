@@ -64,8 +64,8 @@ $app->get('/users/new', function ($request, $response) { //+
 
 $app->post('/users', function ($request, $response) use ($repo_user) { //+
     $user = $request->getParsedBodyParam('user');
-    $validator = new \App\Validator(); //проверка правильности ввода
-    $errors = $validator->validate('name','email', $user);
+    //$validator = new \App\Validator(); //проверка правильности ввода
+    $errors = $repo_user->validate($user);
     if (count($errors) === 0) {
         $repo_user->save($user); //записать юзера
         $this->get('flash')->addMessage('user-status', 'Пользователь создан');
@@ -105,8 +105,8 @@ $app->get('/courses/new', function ($request, $response) { //+
 
 $app->post('/courses', function ($request, $response) use ($repo_course) { //+
     $course = $request->getParsedBodyParam('course');
-    $validator = new App\Validator(); //проверка правильности ввода
-    $errors = $validator->validate('paid', 'title', $course);
+    //$validator = new App\Validator(); //проверка правильности ввода
+    $errors = $repo_course->validate($course);
     if (count($errors) === 0) {
         $repo_course->save($course); //записать
         return $response->withRedirect('/courses', 302);
