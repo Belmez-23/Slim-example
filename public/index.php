@@ -35,10 +35,6 @@ $router = $app->getRouteCollector()->getRouteParser();
 // ************* ГЛАВНАЯ ************* //
 $app->get('/', function ($request, $response) use ($router) { //+
     //var_dump($_SESSION);
-    $router->urlFor('users');
-    $router->urlFor('user'); //users/new
-    $router->urlFor('courses');
-    $router->urlFor('course'); //courses/new
 
     return $this->get('renderer')->render($response, '/../index.php');
 });

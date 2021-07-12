@@ -1,8 +1,9 @@
 <?php
 header('Cache-control: private, max-age=0');
 $day = date('DD');
-//var_dump($_SERVER);
-//var_dump($_GET);  ?>
+var_dump($_SERVER);
+var_dump($_COOKIE);
+var_dump($_SESSION);?>
 <h1>Main page</h1>
 <a href="/users">Страница пользователей</a>
 <br><a href="/courses">Страница курсов</a>
@@ -10,5 +11,4 @@ $day = date('DD');
     <?php if ($day == "Wed") : ?>
     It is Wednesday, my dudes
     <?php endif; ?>
-
 </div>
