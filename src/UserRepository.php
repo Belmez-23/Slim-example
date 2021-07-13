@@ -1,40 +1,72 @@
 <?php
 
 namespace App;
-//include 'Validator.php';
 
-class UserRepository implements Validator
+use mysql_xdevapi\Exception;
+//use PDO;
+
+class UserRepository extends Connection implements Validator
 {
+
+    private $pdo;
     public function __construct()
     {
-        session_start();
-    }
-
-    public function all()
-    {
-        return array_values($_SESSION);
+        if (!$this->pdo) {
+            $pdo = new Connection();
+            $this->pdo = $pdo->getConnection();
+        }
     }
 
     public function find($id)
     {
-        return  $_SESSION[$id] ?? [];//throw new \Exception("Wrong name id: {$id}");
+        try {
+            $query = $this->pdo->prepare("SELECT * FROM Users WHERE id= ? ");
+            $query->execute([$id]);
+            $user = $query->fetch();
+            return $user ?? [];//throw new \Exception("Wrong name id: {$id}");
+        } catch (\Exception $e){
+            echo $e->getMessage();
+            exit;
+        }
     }
 
     public function save(array $user)
     {
-        $user['id'] ?? $user['id'] = 'id'.uniqid();
-        $_SESSION[$user['id']] = $user;
+        try {
+            if(!isset($user['id'])){
+                $user['id'] = 'id' . uniqid();
+                $query = $this->pdo->prepare("INSERT INTO Users values (:i, :n, :e)");
+                $newUser = array(':e' => $user['email'], ':i' => $user['id'], ':n' => $user['name']);
+            }
+            else {
+                $query = $this->pdo->prepare("UPDATE Users SET name = :n, email = :e WHERE id = :i");
+                $newUser = array(':e' => $user['email'], ':i' => $user['id'], ':n' => $user['name']);
+            }
+            $query->execute($newUser);
+            //$_SESSION[$user['id']] = $user;
+        } catch (Exception $e){
+            echo $e->getMessage();
+            exit;
+        }
     }
 
     public function search($term)
     {
-        foreach ($_SESSION as $user){
-            if(str_starts_with($user['id'], 'id') && str_contains($user['name'], $term)){
-                $result[] = ['name' => $user['name'],
-                    'email' => $user['email'],
-                    'id' => $user['id']
-                ];
+        try {
+
+            $data = $this->pdo->query('SELECT * FROM Users')->fetchAll();
+            foreach ($data as $user) {
+                if (str_starts_with($user['id'], 'id') && str_contains($user['name'], $term)) {
+                    $result[] = ['name' => $user['name'],
+                        'email' => $user['email'],
+                        'id' => $user['id']
+                    ];
+                }
             }
+
+        } catch (Exception $e) {
+            echo $e->getMessage();
+            exit;
         }
         return $result;
     }
@@ -56,6 +88,12 @@ class UserRepository implements Validator
 
     public function destroy($id)
     {
-        unset($_SESSION[$id]);
+        try {
+            $del = $this->pdo->prepare("DELETE FROM Users WHERE id = ?");
+            $del->execute([$id]);
+        } catch (Exception $e){
+            echo $e->getMessage();
+            exit;
+        }
     }
 }
