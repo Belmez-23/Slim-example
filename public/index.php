@@ -76,6 +76,25 @@ $app->post('/users', function ($request, $response) use ($repo_user) { //+
     return $this->get('renderer')->render($response, "users/new.phtml", $params);
 });
 
+$app->get('/users/login', function ($request, $response){
+    return $this->get('renderer')->render($response, 'users/log.phtml');
+})->setName('logUser');
+
+$app->post('/users/login', function ($request, $response) use ($repo_user){
+    //взять email, добавить log() в UserRepository, внести результ в $params
+    $mail = $request->getParsedBodyParam('user');
+    $user = $repo_user->login($mail['email']);
+    if(!($user)){
+        return $response->getBody()->write('Пользователь не найден');
+    }
+    return $response->withRedirect('/users/'.$user['id']);
+});
+
+$app->get('/users/logout', function ($request, $response){
+    unset($_SESSION['user']);
+    return $response->withRedirect('/users');
+});
+
 $app->get('/users/{id}', function ($request, Response $response, $args) use ($repo_user) { //adapted
     $user = $repo_user->find($args['id']);
     if(!($user)){
@@ -133,6 +152,7 @@ $app->delete('/users/{id}', function ($request, $response, array $args) use ($ro
     $this->get('flash')->addMessage('user-status', 'Пользователь удалён');
     return $response->withRedirect($router->urlFor('users'));
 });
+
 /************** КУРСЫ **************/
 $repo_course = new App\CourseRepository();
 

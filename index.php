@@ -7,6 +7,10 @@ $day = date('DD');
 //var_dump($_SESSION);
 ?>
 <h1>Main page</h1>
+<?php if ($_SESSION['user']) {
+    echo "Текущий пользователь: " . $_SESSION['user']['name'];
+}?>
+<br>
 <a href="/users">Страница пользователей</a>
 <br><a href="/courses">Страница курсов</a>
 <div>

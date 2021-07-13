@@ -7,8 +7,8 @@ use mysql_xdevapi\Exception;
 
 class UserRepository extends Connection implements Validator
 {
-
     private $pdo;
+
     public function __construct()
     {
         if (!$this->pdo) {
@@ -92,6 +92,19 @@ class UserRepository extends Connection implements Validator
             $del = $this->pdo->prepare("DELETE FROM Users WHERE id = ?");
             $del->execute([$id]);
         } catch (Exception $e){
+            echo $e->getMessage();
+            exit;
+        }
+    }
+
+    public function login($email){
+        try{
+            $log = $this->pdo->prepare("SELECT * FROM Users WHERE email = ?");
+            $log->execute([$email]);
+            $user = $log->fetch();
+            $_SESSION['user'] = $user;
+            return $_SESSION['user'];
+        } catch (\Exception $e){
             echo $e->getMessage();
             exit;
         }

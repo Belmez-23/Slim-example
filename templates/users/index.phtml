@@ -1,4 +1,7 @@
 <h3>My besties</h3>
+<?php if (isset($_SESSION['user'])) {
+    echo "Текущий пользователь: ".$_SESSION['user']['name'];
+}?><br>
 <form method="get" action="/users">
     <input type="search" name="term" value="<?= htmlspecialchars($term) ?>" />
     <input type="submit" value="Search" />
@@ -8,4 +11,6 @@
     <?php endforeach; ?>
 </ul>
 </form>
-<a href="/users/new">Добавить нового</a>
+<a href="/users/new">Добавить нового</a> <br>
+<a href="/users/login">Войти</a>
+<a href="/users/logout">Выйти</a>

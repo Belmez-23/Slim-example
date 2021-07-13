@@ -2,7 +2,7 @@
 <form action="/users/<?= htmlspecialchars($id) ?>/edit" method="get">
     <input type="submit" value="Редактировать">
 </form>
-<form action="/users/<?= htmlspecialchars($id) ?>" method="post">
+<form action="/users/<?= htmlspecialchars($id) ?>" method="post" id="del">
     <input type="hidden" name="_METHOD" value="DELETE"/>
-    <input type="submit" value="Удалить">
+    <input type="button" value="Удалить" onclick="if(confirm('Удалить пользователя?')) document.getElementById('del').submit();">
 </form>
