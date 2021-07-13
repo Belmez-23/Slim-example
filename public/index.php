@@ -85,9 +85,11 @@ $app->post('/users/login', function ($request, $response) use ($repo_user){
     $mail = $request->getParsedBodyParam('user');
     $user = $repo_user->login($mail['email']);
     if(!($user)){
-        return $response->getBody()->write('Пользователь не найден');
+        $response->getBody()->write('Пользователь не найден');
+        return $response->withStatus(404)
+            ->withHeader('Content-Type', 'text/html');
     }
-    return $response->withRedirect('/users/'.$user['id']);
+    else return $response->withRedirect('/users/'.$user['id']);
 });
 
 $app->get('/users/logout', function ($request, $response){

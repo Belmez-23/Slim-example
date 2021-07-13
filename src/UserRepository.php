@@ -102,8 +102,11 @@ class UserRepository extends Connection implements Validator
             $log = $this->pdo->prepare("SELECT * FROM Users WHERE email = ?");
             $log->execute([$email]);
             $user = $log->fetch();
-            $_SESSION['user'] = $user;
-            return $_SESSION['user'];
+            if($user){
+                $_SESSION['user'] = $user;
+                return $_SESSION['user'];
+            }
+            else return null;
         } catch (\Exception $e){
             echo $e->getMessage();
             exit;
